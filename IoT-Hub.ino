@@ -6,11 +6,7 @@
 #include "serialSettings.h"
 #include "pinDefs.h"
 #include "lcdSettings.h"
-
-// Radio Settings
-#define MYID 0
-#define NETWORKID 1
-#define FREQUENCY RF69_915MHZ
+#include "radioSettings.h"
 
 char buff[61]; //61 max payload for radio
 
@@ -32,7 +28,7 @@ void setup()
 	Blink(LED, 200);
 
 	// RADIO
-	if (!radio.initialize(FREQUENCY, MYID, NETWORKID))
+	if (!radio.initialize(FREQUENCY, HUBID, NETWORKID))
 		DEBUGln("radio.init() FAIL");
 	else
 		DEBUGln("radio.init() SUCCESS");
@@ -49,7 +45,7 @@ void setup()
 
 	// DEBUG
 	tft.setCursor(0, 0);
- 	tft.setTextSize(3);
+	tft.setTextSize(3);
 	tft.setTextColor(ILI9341_OLIVE);
 
 	attachInterrupt(digitalPinToInterrupt(BUTTON_INT), pin_ISR, RISING);
@@ -65,6 +61,26 @@ void loop()
 		DEBUGln(i);
 		tft.println(i);
 		newData = false;
+	}
+
+	if (radio.receiveDone())
+	{
+		// Message format
+		// [Zone_ID, Data_Type, Value]
+		for (byte i = 0; i < radio.DATALEN; i++)
+		{
+			tft.print((char)radio.DATA[i]);
+			DEBUG((char)radio.DATA[i]);
+		}
+
+		tft.println();
+		DEBUGln();
+
+		if (radio.ACKRequested())
+		{
+			radio.sendACK();
+			DEBUGln("ACK sent");
+		}
 	}
 }
 

@@ -1,5 +1,4 @@
 // Serial Monitor settings
-
 #define SERIAL_EN      //comment this out when deploying to an installed SM to save a few KB of sketch size
 #define SERIAL_BAUD    115200
 #ifdef SERIAL_EN

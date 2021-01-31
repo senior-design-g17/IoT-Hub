@@ -23,10 +23,6 @@ void setup()
 	delay(2000);
 #endif
 
-	// Debug
-	pinMode(LED, OUTPUT);
-	Blink(LED, 200);
-
 	// RADIO
 	if (!radio.initialize(FREQUENCY, HUBID, NETWORKID))
 		DEBUGln("radio.init() FAIL");
@@ -43,12 +39,14 @@ void setup()
 	tft.cp437(true);
 	yield();
 
+	// Pins
+	pinMode(BUTTON_INT, INPUT);
+	pinMode(BUTTON_ANA, INPUT);
+	attachInterrupt(digitalPinToInterrupt(BUTTON_INT), pin_ISR, FALLING);
+
 	// DEBUG
 	tft.setCursor(0, 0);
 	tft.setTextSize(3);
-	tft.setTextColor(ILI9341_OLIVE);
-
-	attachInterrupt(digitalPinToInterrupt(BUTTON_INT), pin_ISR, RISING);
 }
 
 int i = 0;
@@ -58,29 +56,41 @@ void loop()
 {
 	if (newData) // put your main code here, to run repeatedly:
 	{
+		tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
 		DEBUGln(i);
+		tft.setCursor(0, 32);
 		tft.println(i);
 		newData = false;
 	}
 
 	if (radio.receiveDone())
 	{
-		// Message format
-		// [Zone_ID, Data_Type, Value]
+		int DATALEN = radio.DATALEN;
+		uint8_t DATA[DATALEN];
+
 		for (byte i = 0; i < radio.DATALEN; i++)
 		{
-			tft.print((char)radio.DATA[i]);
-			DEBUG((char)radio.DATA[i]);
+			DATA[i] = radio.DATA[i];
 		}
-
-		tft.println();
-		DEBUGln();
 
 		if (radio.ACKRequested())
 		{
 			radio.sendACK();
 			DEBUGln("ACK sent");
 		}
+
+		tft.setCursor(0, 0);
+		tft.setTextColor(ILI9341_DARKCYAN, ILI9341_BLACK);
+
+		for (byte i = 0; i < DATALEN; i++)
+		{
+			tft.print((char)DATA[i]);
+			DEBUG((char)DATA[i]);
+		}
+		tft.print(' ');
+
+		tft.println();
+		DEBUGln();
 	}
 }
 
@@ -88,12 +98,4 @@ void pin_ISR()
 {
 	newData = true;
 	i++;
-}
-
-// Blink an LED for a given number of ms
-void Blink(byte PIN, int DELAY_MS)
-{
-	digitalWrite(PIN, HIGH);
-	delay(DELAY_MS);
-	digitalWrite(PIN, LOW);
 }

@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
+// #include <Fonts/Org_01.h> https://learn.adafruit.com/adafruit-gfx-graphics-library/using-fonts
 
 #include "serialSettings.h"
 #include "pinDefs.h"
@@ -58,20 +59,17 @@ void loop()
 	{
 		tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
 		DEBUGln(i);
-		tft.setCursor(0, 32);
+		tft.setCursor(0, 0);
 		tft.println(i);
 		newData = false;
 	}
 
 	if (radio.receiveDone())
 	{
-		int DATALEN = radio.DATALEN;
-		uint8_t DATA[DATALEN];
+		Payload payload;
 
-		for (byte i = 0; i < radio.DATALEN; i++)
-		{
-			DATA[i] = radio.DATA[i];
-		}
+		if (radio.DATALEN == sizeof(Payload))
+			payload = *(Payload *)radio.DATA;
 
 		if (radio.ACKRequested())
 		{
@@ -79,18 +77,26 @@ void loop()
 			DEBUGln("ACK sent");
 		}
 
-		tft.setCursor(0, 0);
-		tft.setTextColor(ILI9341_DARKCYAN, ILI9341_BLACK);
+		DEBUGln(payload.type);
+		DEBUGln(payload.data);
 
-		for (byte i = 0; i < DATALEN; i++)
+		switch (payload.type)
 		{
-			tft.print((char)DATA[i]);
-			DEBUG((char)DATA[i]);
+		case curr_temp:
+			tft.setCursor(0, 32);
+			tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
+			tft.print(payload.data);
+			tft.print(" F ");
+			break;
+		case target_temp:
+			tft.setCursor(0, 64);
+			tft.setTextColor(ILI9341_GREENYELLOW, ILI9341_BLACK);
+			tft.print(payload.data);
+			tft.print(" F");
+			break;
+		default:
+			break;
 		}
-		tft.print(' ');
-
-		tft.println();
-		DEBUGln();
 	}
 }
 

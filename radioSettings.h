@@ -19,7 +19,7 @@ enum command : uint8_t
 // Payload Struct Defintion
 typedef struct
 {
-	uint8_t zoneID;	//store this nodeId
+	uint8_t zoneID; //store this nodeId
 	command type;	//uptime in ms
 	uint8_t data;	//temperature maybe?
 } Payload;

@@ -8,8 +8,7 @@
 #include "pinDefs.h"
 #include "lcdSettings.h"
 #include "radioSettings.h"
-
-char buff[61]; //61 max payload for radio
+#include "buttonSettings.h"
 
 // Init Radio Object
 RFM69 radio;
@@ -50,17 +49,18 @@ void setup()
 	tft.setTextSize(3);
 }
 
-int i = 0;
+buttonState button = none;
 bool newData = false;
 
 void loop()
 {
 	if (newData) // put your main code here, to run repeatedly:
 	{
-		tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
-		DEBUGln(i);
+		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
+		DEBUGln(button);
 		tft.setCursor(0, 0);
-		tft.println(i);
+		tft.print(button);
+		tft.print("     ");
 		newData = false;
 	}
 
@@ -84,15 +84,17 @@ void loop()
 		{
 		case curr_temp:
 			tft.setCursor(0, 32);
-			tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
+			tft.setTextColor(ILI9341_PINK, ILI9341_BLACK);
 			tft.print(payload.data);
-			tft.print(" F ");
+			tft.print((char)249);
+			tft.print("F ");
 			break;
 		case target_temp:
 			tft.setCursor(0, 64);
-			tft.setTextColor(ILI9341_GREENYELLOW, ILI9341_BLACK);
+			tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
 			tft.print(payload.data);
-			tft.print(" F");
+			tft.print((char)250);
+			tft.print("F ");
 			break;
 		default:
 			break;
@@ -102,6 +104,18 @@ void loop()
 
 void pin_ISR()
 {
-	newData = true;
-	i++;
+	int rawData = analogRead(BUTTON_ANA);
+
+	if(rawData < BUTTON_1)
+		button = down;
+	else if(rawData < BUTTON_2)
+		button = up;
+	else if(rawData < BUTTON_3)
+		button = left;
+	else if(rawData < BUTTON_4)
+		button = right;
+	else
+		button = none;
+
+	newData = button != none;
 }

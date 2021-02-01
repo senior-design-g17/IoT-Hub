@@ -150,6 +150,8 @@ void loop()
 				tft.print("Close");
 				break;
 			}
+
+			sendPayload(comm);
 		}
 	}
 }
@@ -191,5 +193,18 @@ void setHVACpins(HVAC_State state)
 		digitalWrite(AC_HEAT, LOW);
 		digitalWrite(AC_COOL, HIGH);
 		break;
+	}
+}
+
+void sendPayload(Payload load)
+{
+	DEBUGln(load.zoneID);
+	DEBUGln(load.type);
+	DEBUGln(load.data);
+
+	if (radio.sendWithRetry(load.zoneID, (const void *)(&load), sizeof(load), RETRY_COUNT, RETRY_WAIT))
+	{
+		DEBUGln("ACK received!");
+		newPayload = false;
 	}
 }

@@ -5,5 +5,5 @@
 
 #define ENCRYPT false				  // Set to "true" to use encryption
 #define ENCRYPTKEY "TOPSECRETPASSWRD" // Use the same 16-byte key on all nodes
-#define RETRY_COUNT 5
+#define RETRY_COUNT 2
 #define RETRY_WAIT 10

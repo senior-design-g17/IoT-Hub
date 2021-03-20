@@ -159,6 +159,7 @@ void zoneManager::processData()
 	for (int i = 0; i < zones.size(); i++)
 	{
 		Payload load;
+		load.zoneID = zones[i].vent;
 		load.type = vent_state;
 
 		// Too hot turn on ac

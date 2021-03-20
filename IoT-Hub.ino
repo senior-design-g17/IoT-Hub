@@ -48,6 +48,8 @@ void setup()
 	pinMode(AC_FAN, OUTPUT);
 	pinMode(AC_HEAT, OUTPUT);
 	pinMode(AC_COOL, OUTPUT);
+	pinMode(TFT_BL, OUTPUT);
+	digitalWrite(TFT_BL, HIGH);
 
 	attachInterrupt(digitalPinToInterrupt(BUTTON_INT), pin_ISR, FALLING);
 
@@ -63,13 +65,15 @@ bool newData = false;
 
 void loop()
 {
-	if (newData) // put your main code here, to run repeatedly:
+	// button handling
+	if (newData)
 	{
 		tft.setTextColor(ILI9341_LIGHTGREY, ILI9341_BLACK);
 		DEBUGln(button);
 		tft.setCursor(0, 0);
 		tft.print(button);
 		tft.print("     ");
+
 		newData = false;
 	}
 
@@ -133,7 +137,7 @@ void loop()
 				break;
 			}
 
-			setHVAC((HVAC_State)comm.data);
+			setHVACpins((HVAC_State)comm.data);
 		}
 		else if (comm.type == vent_state)
 		{
@@ -196,7 +200,7 @@ void setHVACpins(HVAC_State state)
 	}
 }
 
-void sendPayload(Payload load)
+bool sendPayload(Payload load)
 {
 	DEBUGln(load.zoneID);
 	DEBUGln(load.type);
@@ -205,6 +209,8 @@ void sendPayload(Payload load)
 	if (radio.sendWithRetry(load.zoneID, (const void *)(&load), sizeof(load), RETRY_COUNT, RETRY_WAIT))
 	{
 		DEBUGln("ACK received!");
-		newPayload = false;
+		return false;
 	}
+
+	return true;
 }

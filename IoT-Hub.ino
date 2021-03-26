@@ -79,16 +79,7 @@ void loop()
 
 	if (radio.receiveDone())
 	{
-		Payload payload;
-
-		if (radio.DATALEN == sizeof(Payload))
-			payload = *(Payload *)radio.DATA;
-
-		if (radio.ACKRequested())
-		{
-			radio.sendACK();
-			DEBUGln("ACK sent");
-		}
+		Payload payload = getLoad();
 
 		switch (payload.type)
 		{
@@ -213,4 +204,24 @@ bool sendPayload(Payload load)
 	}
 
 	return true;
+}
+
+Payload getLoad()
+{
+	Payload load;
+
+	if (radio.DATALEN == sizeof(Payload))
+		load = *(Payload *)radio.DATA;
+
+	if (radio.ACKRequested())
+	{
+		radio.sendACK();
+		DEBUGln("ACK sent");
+	}
+
+	DEBUGln(load.zoneID);
+	DEBUGln(load.type);
+	DEBUGln(load.data);
+
+	return load;
 }

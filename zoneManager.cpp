@@ -162,6 +162,10 @@ void zoneManager::processData()
 		load.zoneID = zones[i].vent;
 		load.type = vent_state;
 
+		// load.data = ACstate == off ? close : open;
+		// payloadQueue.push_back(load);
+
+
 		// Too hot turn on ac
 		if (zones[i].currTemp > zones[i].currTarget)
 		{
@@ -190,8 +194,8 @@ void zoneManager::processData()
 			load.data = close;
 		}
 
-		// Update only if it doesnt match current state
-		if (load.data == zones[i].ventState)
+		// Update only if it doesn't match current state
+		if (load.data != zones[i].ventState)
 		{
 			payloadQueue.push_back(load);
 			zones[i].ventState = (Vent_State)load.data;

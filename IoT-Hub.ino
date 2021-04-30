@@ -58,6 +58,8 @@ void setup()
 	tft.setTextSize(3);
 
 	ZONE_MANAGER.addZone(2, 3);
+	ZONE_MANAGER.addZone(4, 5);
+	ZONE_MANAGER.addZone(6, 7);
 }
 
 buttonState button = none;
@@ -84,18 +86,18 @@ void loop()
 		switch (payload.type)
 		{
 		case curr_temp:
-			tft.setCursor(0, 32);
+			tft.setCursor(100 * payload.zoneID, 32);
 			tft.setTextColor(ILI9341_PINK, ILI9341_BLACK);
 			tft.print(payload.data);
 			tft.print((char)249);
-			tft.print("F ");
+			tft.print("F");
 			break;
 		case target_temp:
-			tft.setCursor(0, 64);
+			tft.setCursor(100 * payload.zoneID, 64);
 			tft.setTextColor(ILI9341_ORANGE, ILI9341_BLACK);
 			tft.print(payload.data);
 			tft.print((char)248);
-			tft.print("F ");
+			tft.print("F");
 			break;
 		default:
 			break;
@@ -107,10 +109,9 @@ void loop()
 	if (ZONE_MANAGER.havePayloads())
 	{
 		Payload comm = ZONE_MANAGER.getPayload();
-
 		if (comm.type == HVAC)
 		{
-			tft.setCursor(0, 128);
+			tft.setCursor(100, 208);
 
 			switch ((HVAC_State)comm.data)
 			{
@@ -132,7 +133,9 @@ void loop()
 		}
 		else if (comm.type == vent_state)
 		{
-			tft.setCursor(0, 96);
+			int col = (comm.zoneID - 3) / 2;
+
+			tft.setCursor(100 * col, 96);
 
 			switch ((Vent_State)comm.data)
 			{
@@ -154,6 +157,7 @@ void loop()
 void pin_ISR()
 {
 	int rawData = analogRead(BUTTON_ANA);
+	DEBUGln(rawData);
 
 	if (rawData < BUTTON_1)
 		button = down;
